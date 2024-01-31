@@ -1,0 +1,23 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-mlexpensereport-dev-95251-authRole",
+      "UnauthRoleArn": "arn:aws:iam::429658707891:role/amplify-mlexpensereport-dev-95251-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::429658707891:role/amplify-mlexpensereport-dev-95251-authRole",
+      "Region": "us-east-2",
+      "DeploymentBucketName": "amplify-mlexpensereport-dev-95251-deployment",
+      "UnauthRoleName": "amplify-mlexpensereport-dev-95251-unauthRole",
+      "StackName": "amplify-mlexpensereport-dev-95251",
+      "StackId": "arn:aws:cloudformation:us-east-2:429658707891:stack/amplify-mlexpensereport-dev-95251/cab28d80-c050-11ee-9ba6-06266a532ebd",
+      "AmplifyAppId": "dhfei9s4y8dk7"
+    },
+    "categories": {
+      "auth": {
+        "mlexpensereportb879e0e1": {}
+      },
+      "storage": {
+        "expensereportstorage": {}
+      }
+    }
+  }
+}
