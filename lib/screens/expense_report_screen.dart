@@ -74,7 +74,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
     final body = json.encode({
       'expensereportid': uniqueKey,
       'department': controllers['department']?.text ?? '',
-      'companyname': controllers['companyName']?.text ?? '',
+      'companyname': controllers['companyname']?.text ?? '',
       'expensecategory': controllers['expensecategory']?.text ?? '',
       'datesubmitted': backendDate,
       'amount': controllers['amount']?.text ?? '',

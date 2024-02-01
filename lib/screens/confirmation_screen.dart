@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
 import '../widgets/custom_round_button.dart';
 import '../widgets/custom_app_bar.dart';
@@ -16,18 +17,29 @@ class ConfirmationScreen extends StatelessWidget {
   const ConfirmationScreen({Key? key, required this.responseData})
       : super(key: key);
 
+  String formatDate(String dateStr) {
+    final match = RegExp(r'/Date\((\d+)([+-]\d+)?\)/').firstMatch(dateStr);
+    if (match != null) {
+      final timestamp = int.parse(match.group(1)!);
+      final date = DateTime.fromMillisecondsSinceEpoch(timestamp).toLocal();
+      final adjustedDate = date.add(Duration(days: 1));
+      return DateFormat.yMMMd().format(adjustedDate);
+    } else {
+      return 'Invalid date';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance!.addPostFrameCallback((_) {
       Fluttertoast.showToast(
-        msg: "Expense report submitted successfully",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-        fontSize: 16.0
-      );
+          msg: "Expense report submitted successfully",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.green,
+          textColor: Colors.white,
+          fontSize: 16.0);
     });
 
     return Scaffold(
@@ -82,7 +94,8 @@ class ConfirmationScreen extends StatelessWidget {
                   margin: const EdgeInsets.all(10.0),
                   height: 40,
                   child: TextFormField(
-                    initialValue: responseData['d']['datesubmitted'],
+                    initialValue:
+                        formatDate(responseData['d']['datesubmitted']),
                     readOnly: true,
                     decoration: inputDecoration.copyWith(labelText: 'Date'),
                   ),
