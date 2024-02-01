@@ -1,8 +1,11 @@
+import 'dart:io';
+import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:uuid/uuid.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
 import '../widgets/custom_round_button.dart';
 import '../widgets/custom_app_bar.dart';
@@ -23,17 +26,18 @@ class ExpenseReportScreen extends StatefulWidget {
 
 class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
   DateTime selectedDate = DateTime.now();
+  String backendDate = '';
   final Map<String, TextEditingController> controllers = {
     'department': TextEditingController(),
-    'companyName': TextEditingController(),
-    'expenseType': TextEditingController(),
-    'date': TextEditingController(),
+    'companyname': TextEditingController(),
+    'expensecategory': TextEditingController(),
+    'datesubmitted': TextEditingController(),
     'amount': TextEditingController(),
-    'taxInformation': TextEditingController(),
-    'businessReason': TextEditingController(),
-    'projectCode': TextEditingController(),
+    'taxinformation': TextEditingController(),
+    'businessreason': TextEditingController(),
+    'projectcode': TextEditingController(),
     'status': TextEditingController(),
-    'additionalNotes': TextEditingController(),
+    'additionalnotes': TextEditingController(),
   };
 
   @override
@@ -42,8 +46,21 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
     super.dispose();
   }
 
+  String generateRandomString(int length) {
+    const _randomChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const _charsLength = _randomChars.length;
+
+    final rand = Random();
+    final codeUnits = List.generate(length, (index) {
+      int randIndex = rand.nextInt(_charsLength);
+      return _randomChars.codeUnitAt(randIndex);
+    });
+
+    return String.fromCharCodes(codeUnits);
+  }
+
   Future<void> submitExpenseReport() async {
-    final url =
+    const url =
         'https://s4hana2022.mindsetconsulting.com:44300/sap/opu/odata/sap/ZEXPENSE_DEV_API/Expense';
     String? username = dotenv.env['USERNAME'];
     String? password = dotenv.env['PASSWORD'];
@@ -53,30 +70,41 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
       'Content-Type': 'application/json',
       'X-Requested-With': 'false',
     };
+
+    String uniqueKey = generateRandomString(6);
+
     final body = json.encode({
-      'department': controllers['department']!.text,
-      'companyName': controllers['companyName']!.text,
-      'expenseType': controllers['expenseType']!.text,
-      'date': controllers['date']!.text,
-      'amount': controllers['amount']!.text,
-      'taxInformation': controllers['taxInformation']!.text,
-      'businessReason': controllers['businessReason']!.text,
-      'projectCode': controllers['projectCode']!.text,
-      'status': controllers['status']!.text,
-      'additionalNotes': controllers['additionalNotes']!.text,
+      'expensereportid': uniqueKey,
+      'department': controllers['department']?.text ?? '',
+      'companyname': controllers['companyName']?.text ?? '',
+      'expensecategory': controllers['expensecategory']?.text ?? '',
+      'datesubmitted': backendDate,
+      'amount': controllers['amount']?.text ?? '',
+      'taxinformation': controllers['taxinformation']?.text ?? '',
+      'businessreason': controllers['businessreason']?.text ?? '',
+      'projectcode': controllers['projectcode']?.text ?? '',
+      'status': controllers['status']?.text ?? '',
+      'additionalnotes': controllers['additionalnotes']?.text ?? '',
     });
 
-    final response =
-        await http.post(Uri.parse(url), headers: headers, body: body);
-    
-    print(response.body);
+    print('body: $body');
 
-    if (response.statusCode == 200) {
-      print('Expense report sent successfully');
-    } else {
-      throw Exception('Failed to send expense report');
-    }
+    HttpClient client = new HttpClient()
+      ..badCertificateCallback =
+          ((X509Certificate cert, String host, int port) => true);
+
+    HttpClientRequest request = await client.postUrl(Uri.parse(url));
+    request.headers.set('content-type', 'application/json');
+    request.headers.set('Authorization', headers['Authorization'] ?? '');
+    request.headers.set('X-Requested-With', headers['X-Requested-With'] ?? '');
+    request.add(utf8.encode(body));
+
+    HttpClientResponse response = await request.close();
+    String reply = await response.transform(utf8.decoder).join();
+    print(reply);
   }
+
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -86,6 +114,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Form(
+            key: _formKey,
             child: Column(
               children: <Widget>[
                 FieldContainer(
@@ -96,18 +125,22 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                 FieldContainer(
                   fieldName: 'Department',
                   controller: controllers['department']!,
+                  isRequired: true,
                 ),
                 FieldContainer(
                   fieldName: 'Company Name',
-                  controller: controllers['companyName']!,
+                  controller: controllers['companyname']!,
+                  isRequired: true,
                 ),
                 FieldContainer(
                   fieldName: 'Expense Type',
-                  controller: controllers['expenseType']!,
+                  controller: controllers['expensecategory']!,
+                  isRequired: true,
                 ),
                 FieldContainer(
                   fieldName: 'Date',
-                  controller: controllers['date']!,
+                  controller: controllers['datesubmitted']!,
+                  isRequired: true,
                   onTap: () async {
                     FocusScope.of(context).requestFocus(FocusNode());
                     final DateTime? picked = await showDatePicker(
@@ -119,8 +152,15 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                     if (picked != null && picked != selectedDate) {
                       setState(() {
                         selectedDate = picked;
-                        controllers['date']?.text =
-                            DateFormat.yMd().format(selectedDate);
+                        final displayFormat = DateFormat('MMM dd, yyyy');
+                        final formattedDateForDisplay =
+                            displayFormat.format(selectedDate);
+
+                        final backendFormat = DateFormat('yyyy-MM-ddTHH:mm:ss');
+                        backendDate = backendFormat.format(selectedDate);
+
+                        controllers['datesubmitted']?.text =
+                            formattedDateForDisplay;
                       });
                     }
                   },
@@ -138,21 +178,22 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                       child: FieldContainer(
                         fieldName: 'Amount',
                         controller: controllers['amount']!,
+                        isRequired: true,
                       ),
                     ),
                   ],
                 ),
                 FieldContainer(
                   fieldName: 'Tax Information',
-                  controller: controllers['taxInformation']!,
+                  controller: controllers['taxinformation']!,
                 ),
                 FieldContainer(
                   fieldName: 'Business Reason',
-                  controller: controllers['businessReason']!,
+                  controller: controllers['businessreason']!,
                 ),
                 FieldContainer(
                   fieldName: 'Project Code',
-                  controller: controllers['projectCode']!,
+                  controller: controllers['projectcode']!,
                 ),
                 FieldContainer(
                   fieldName: 'Status',
@@ -161,7 +202,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                 ),
                 FieldContainer(
                   fieldName: 'Additional Notes',
-                  controller: controllers['additionalNotes']!,
+                  controller: controllers['additionalnotes']!,
                 ),
               ],
             ),
@@ -172,8 +213,10 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
         buttons: [
           CustomRoundButton(
               onPressed: () {
-                submitExpenseReport();
-                Navigator.pushNamed(context, '/confirmation');
+                if (_formKey.currentState!.validate()) {
+                  submitExpenseReport();
+                  Navigator.pushNamed(context, '/confirmation');
+                }
               },
               fillColor: Theme.of(context).colorScheme.primary,
               icon: Icons.check,

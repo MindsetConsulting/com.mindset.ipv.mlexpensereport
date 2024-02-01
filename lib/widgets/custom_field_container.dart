@@ -4,9 +4,9 @@ class FieldContainer extends StatelessWidget {
   final String fieldName;
   final TextEditingController? controller;
   final String? initialValue;
-
   final Function? onTap;
   final bool readOnly;
+  final bool isRequired;
 
   FieldContainer({
     required this.fieldName,
@@ -14,6 +14,7 @@ class FieldContainer extends StatelessWidget {
     this.initialValue,
     this.onTap,
     this.readOnly = false,
+    this.isRequired = false,
   });
 
   static const InputDecoration inputDecoration = InputDecoration(
@@ -33,6 +34,12 @@ class FieldContainer extends StatelessWidget {
         decoration: inputDecoration.copyWith(labelText: fieldName),
         onTap: onTap as void Function()?,
         readOnly: readOnly,
+        validator: (value) {
+        if (isRequired && (value == null || value.isEmpty)) {
+          return 'This field is required';
+        }
+        return null;
+      },
       ),
     );
   }
