@@ -40,12 +40,33 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       theme: appTheme(),
       initialRoute: '/',
-      routes: {
-        '/': (context) => ExpenseReportListScreen(key: UniqueKey()),
-        '/upload': (context) => UploadFile(),
-        '/report': (context) => const ExpenseReportScreen(),
-        '/confirmation': (context) => const ConfirmationScreen(),
-        '/detail': (context) => const ExpenseDetailScreen(),
+      onGenerateRoute: (settings) {
+        // Match the route name with the ones you have
+        switch (settings.name) {
+          case '/':
+            return MaterialPageRoute(
+                builder: (context) =>
+                    ExpenseReportListScreen(key: UniqueKey()));
+          case '/upload':
+            return MaterialPageRoute(builder: (context) => UploadFile());
+          case '/report':
+            return MaterialPageRoute(
+                builder: (context) => const ExpenseReportScreen());
+          case '/confirmation':
+            final responseData = settings.arguments;
+            return MaterialPageRoute(
+              builder: (context) => ConfirmationScreen(
+                responseData: responseData as Map<String, dynamic>,
+              ),
+            );
+          case '/detail':
+            return MaterialPageRoute(
+                builder: (context) => const ExpenseDetailScreen());
+          default:
+            return MaterialPageRoute(
+                builder: (context) =>
+                    ExpenseReportListScreen(key: UniqueKey()));
+        }
       },
     );
   }

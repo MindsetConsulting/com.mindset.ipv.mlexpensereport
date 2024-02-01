@@ -3,9 +3,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:uuid/uuid.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
 import '../widgets/custom_round_button.dart';
 import '../widgets/custom_app_bar.dart';
@@ -59,7 +57,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
     return String.fromCharCodes(codeUnits);
   }
 
-  Future<void> submitExpenseReport() async {
+  Future<Map<String, dynamic>> submitExpenseReport() async {
     const url =
         'https://s4hana2022.mindsetconsulting.com:44300/sap/opu/odata/sap/ZEXPENSE_DEV_API/Expense';
     String? username = dotenv.env['USERNAME'];
@@ -83,11 +81,9 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
       'taxinformation': controllers['taxinformation']?.text ?? '',
       'businessreason': controllers['businessreason']?.text ?? '',
       'projectcode': controllers['projectcode']?.text ?? '',
-      'status': controllers['status']?.text ?? '',
+      'status': 'pending',
       'additionalnotes': controllers['additionalnotes']?.text ?? '',
     });
-
-    print('body: $body');
 
     HttpClient client = new HttpClient()
       ..badCertificateCallback =
@@ -97,11 +93,16 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
     request.headers.set('content-type', 'application/json');
     request.headers.set('Authorization', headers['Authorization'] ?? '');
     request.headers.set('X-Requested-With', headers['X-Requested-With'] ?? '');
+    request.headers.set('Accept', 'application/json');
     request.add(utf8.encode(body));
 
     HttpClientResponse response = await request.close();
     String reply = await response.transform(utf8.decoder).join();
-    print(reply);
+
+    Map<String, dynamic> responseData = jsonDecode(reply);
+
+    // print('ResponseData: $responseData');
+    return responseData;
   }
 
   final _formKey = GlobalKey<FormState>();
@@ -133,7 +134,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                   isRequired: true,
                 ),
                 FieldContainer(
-                  fieldName: 'Expense Type',
+                  fieldName: 'Expense Category',
                   controller: controllers['expensecategory']!,
                   isRequired: true,
                 ),
@@ -212,10 +213,15 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
       bottomNavigationBar: CustomBottomNavigationBar(
         buttons: [
           CustomRoundButton(
-              onPressed: () {
+              onPressed: () async {
                 if (_formKey.currentState!.validate()) {
-                  submitExpenseReport();
-                  Navigator.pushNamed(context, '/confirmation');
+                  Map<String, dynamic> responseData =
+                      await submitExpenseReport();
+                  Navigator.pushNamed(
+                    context,
+                    '/confirmation',
+                    arguments: responseData,
+                  );
                 }
               },
               fillColor: Theme.of(context).colorScheme.primary,

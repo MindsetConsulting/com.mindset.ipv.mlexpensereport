@@ -10,7 +10,10 @@ const InputDecoration inputDecoration = InputDecoration(
 );
 
 class ConfirmationScreen extends StatelessWidget {
-  const ConfirmationScreen({Key? key}) : super(key: key);
+  final Map<String, dynamic> responseData;
+
+  const ConfirmationScreen({Key? key, required this.responseData})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -26,17 +29,7 @@ class ConfirmationScreen extends StatelessWidget {
                   margin: const EdgeInsets.all(10.0),
                   height: 40,
                   child: TextFormField(
-                    initialValue: 'John Doe',
-                    readOnly: true,
-                    decoration:
-                        inputDecoration.copyWith(labelText: 'Employee Name'),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(10.0),
-                  height: 40,
-                  child: TextFormField(
-                    initialValue: '00001',
+                    initialValue: '001',
                     readOnly: true,
                     decoration:
                         inputDecoration.copyWith(labelText: 'Employee ID'),
@@ -46,7 +39,7 @@ class ConfirmationScreen extends StatelessWidget {
                   margin: const EdgeInsets.all(10.0),
                   height: 40,
                   child: TextFormField(
-                    initialValue: 'Sales',
+                    initialValue: responseData['d']['department'],
                     readOnly: true,
                     decoration:
                         inputDecoration.copyWith(labelText: 'Department'),
@@ -56,17 +49,27 @@ class ConfirmationScreen extends StatelessWidget {
                   margin: const EdgeInsets.all(10.0),
                   height: 40,
                   child: TextFormField(
-                    initialValue: 'Travel',
+                    initialValue: responseData['d']['companyname'],
                     readOnly: true,
                     decoration:
-                        inputDecoration.copyWith(labelText: 'Expense Type'),
+                        inputDecoration.copyWith(labelText: 'Company Name'),
                   ),
                 ),
                 Container(
                   margin: const EdgeInsets.all(10.0),
                   height: 40,
                   child: TextFormField(
-                    initialValue: '2023-11-11',
+                    initialValue: responseData['d']['expensecategory'],
+                    readOnly: true,
+                    decoration:
+                        inputDecoration.copyWith(labelText: 'Expense Category'),
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.all(10.0),
+                  height: 40,
+                  child: TextFormField(
+                    initialValue: responseData['d']['datesubmitted'],
                     readOnly: true,
                     decoration: inputDecoration.copyWith(labelText: 'Date'),
                   ),
@@ -90,7 +93,7 @@ class ConfirmationScreen extends StatelessWidget {
                         margin: const EdgeInsets.all(10.0),
                         height: 40,
                         child: TextFormField(
-                          initialValue: '100.00',
+                          initialValue: responseData['d']['amount'],
                           readOnly: true,
                           decoration:
                               inputDecoration.copyWith(labelText: 'Amount'),
@@ -103,7 +106,7 @@ class ConfirmationScreen extends StatelessWidget {
                   margin: const EdgeInsets.all(10.0),
                   height: 40,
                   child: TextFormField(
-                    initialValue: 'VAT %20',
+                    initialValue: responseData['d']['taxinformation'],
                     readOnly: true,
                     decoration:
                         inputDecoration.copyWith(labelText: 'Tax Information'),
@@ -113,7 +116,7 @@ class ConfirmationScreen extends StatelessWidget {
                   margin: const EdgeInsets.all(10.0),
                   height: 40,
                   child: TextFormField(
-                    initialValue: 'Business trip',
+                    initialValue: responseData['d']['businessreason'],
                     readOnly: true,
                     decoration:
                         inputDecoration.copyWith(labelText: 'Business Reason'),
@@ -123,7 +126,7 @@ class ConfirmationScreen extends StatelessWidget {
                   margin: const EdgeInsets.all(10.0),
                   height: 40,
                   child: TextFormField(
-                    initialValue: '123abc',
+                    initialValue: responseData['d']['projectcode'],
                     readOnly: true,
                     decoration:
                         inputDecoration.copyWith(labelText: 'Project Code'),
@@ -142,7 +145,7 @@ class ConfirmationScreen extends StatelessWidget {
                   margin: const EdgeInsets.all(10.0),
                   height: 40,
                   child: TextFormField(
-                    initialValue: 'Went on a business trip to New York',
+                    initialValue: responseData['d']['additionalnotes'],
                     readOnly: true,
                     decoration:
                         inputDecoration.copyWith(labelText: 'Additional Notes'),

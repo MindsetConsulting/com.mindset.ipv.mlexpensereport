@@ -1,11 +1,7 @@
 import 'dart:io' as io;
 import 'dart:math';
-import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
-import 'package:amplify_storage_s3/amplify_storage_s3.dart';
 import 'package:aws_common/vm.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import '../services/media/media_service_interface.dart';
