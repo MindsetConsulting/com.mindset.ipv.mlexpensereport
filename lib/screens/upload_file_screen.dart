@@ -3,7 +3,6 @@ import 'dart:math';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:aws_common/vm.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:http/http.dart' as http;
 import '../services/media/media_service_interface.dart';
@@ -63,27 +62,14 @@ class _UploadFileState extends State<UploadFile> {
     }
   }
 
-  // Future<void> uploadIOFile(io.File file) async {
-  //   final awsFile = AWSFilePlatform.fromFile(file);
-  //   try {
-  //     final uploadResult = await Amplify.Storage.uploadFile(
-  //       localFile: awsFile,
-  //       key: file.path,
-  //     ).result;
-  //     safePrint('Uploaded file: ${uploadResult.uploadedItem.key}');
-  //     safePrint('AWS response: ${uploadResult.uploadedItem.toString()}');
-
-  //     Navigator.pushNamed(context, '/report');
-  //   } on StorageException catch (e) {
-  //     safePrint('Error uploading file: ${e.message}');
-  //     rethrow;
-  //   }
-  // }
-
   Future<void> uploadIOFile(io.File file) async {
     final url =
         'https://7kfj895ua0.execute-api.us-east-2.amazonaws.com/default/mlExpenseReportLambda';
 
+    setState(() {
+      _isLoadingGettingFile = true;
+    });
+    
     try {
       var bytes = await file.readAsBytes();
       var base64File = base64Encode(bytes);
@@ -99,16 +85,22 @@ class _UploadFileState extends State<UploadFile> {
       if (response.statusCode == 200) {
         safePrint('Uploaded file: ${file.path}');
         safePrint('Response body: ${response.body}');
+        //need to save response into an obejct and pass it to the next screen
         Navigator.pushNamed(context, '/report');
       } else {
         safePrint('Error uploading file: ${response.statusCode}');
         safePrint('Response body: ${response.body}');
-        // var jsonBody = json.encode({"file": base64File});
-        // safePrint('JSON body: $jsonBody');
+        Navigator.pushNamedAndRemoveUntil(
+            context, '/', (Route<dynamic> route) => false);
+        //need a dialog to appear with the error message
       }
     } catch (e) {
       safePrint('Error uploading file: ${e.toString()}');
       rethrow;
+    } finally {
+      setState(() {
+        _isLoadingGettingFile = false;
+      });
     }
   }
 
@@ -125,11 +117,13 @@ class _UploadFileState extends State<UploadFile> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(),
-      body: const Padding(
+      body: Padding(
         padding: EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: SizedBox(),
-        ),
+        child: _isLoadingGettingFile
+            ? Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                child: SizedBox(),
+              ),
       ),
       bottomNavigationBar: CustomBottomNavigationBar(
         buttons: [
