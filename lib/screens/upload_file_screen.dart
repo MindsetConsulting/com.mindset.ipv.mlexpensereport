@@ -69,7 +69,7 @@ class _UploadFileState extends State<UploadFile> {
     setState(() {
       _isLoadingGettingFile = true;
     });
-    
+
     try {
       var bytes = await file.readAsBytes();
       var base64File = base64Encode(bytes);
@@ -85,14 +85,30 @@ class _UploadFileState extends State<UploadFile> {
       if (response.statusCode == 200) {
         safePrint('Uploaded file: ${file.path}');
         safePrint('Response body: ${response.body}');
-        //need to save response into an obejct and pass it to the next screen
+        //need to save response into an object and pass it to the next screen
         Navigator.pushNamed(context, '/report');
       } else {
         safePrint('Error uploading file: ${response.statusCode}');
         safePrint('Response body: ${response.body}');
-        Navigator.pushNamedAndRemoveUntil(
-            context, '/', (Route<dynamic> route) => false);
-        //need a dialog to appear with the error message
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Error'),
+              content: Text(
+                  'No text found in file. Please try again with a different file'),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('OK'),
+                  onPressed: () {
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, '/', (Route<dynamic> route) => false);
+                  },
+                ),
+              ],
+            );
+          },
+        );
       }
     } catch (e) {
       safePrint('Error uploading file: ${e.toString()}');
