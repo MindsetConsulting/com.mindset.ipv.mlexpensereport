@@ -41,7 +41,6 @@ class MainApp extends StatelessWidget {
       theme: appTheme(),
       initialRoute: '/',
       onGenerateRoute: (settings) {
-        // Match the route name with the ones you have
         switch (settings.name) {
           case '/':
             return MaterialPageRoute(

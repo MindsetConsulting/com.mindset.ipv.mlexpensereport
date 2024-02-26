@@ -1,9 +1,11 @@
 import 'dart:io' as io;
 import 'dart:math';
+import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:aws_common/vm.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
+import 'package:http/http.dart' as http;
 import '../services/media/media_service_interface.dart';
 import '../services/service_locator.dart';
 import '../widgets/image_picker_action_sheet.dart';
@@ -55,24 +57,57 @@ class _UploadFileState extends State<UploadFile> {
     try {
       final ioFile = io.File(pickedImageFile.path);
       await uploadIOFile(ioFile);
-      safePrint('File uploaded successfully to S3');
+      safePrint('File selected');
     } catch (e) {
       safePrint('Error uploading file to S3: $e');
     }
   }
 
-  Future<void> uploadIOFile(io.File file) async {
-    final awsFile = AWSFilePlatform.fromFile(file);
-    try {
-      final uploadResult = await Amplify.Storage.uploadFile(
-        localFile: awsFile,
-        key: file.path,
-      ).result;
-      safePrint('Uploaded file: ${uploadResult.uploadedItem.key}');
+  // Future<void> uploadIOFile(io.File file) async {
+  //   final awsFile = AWSFilePlatform.fromFile(file);
+  //   try {
+  //     final uploadResult = await Amplify.Storage.uploadFile(
+  //       localFile: awsFile,
+  //       key: file.path,
+  //     ).result;
+  //     safePrint('Uploaded file: ${uploadResult.uploadedItem.key}');
+  //     safePrint('AWS response: ${uploadResult.uploadedItem.toString()}');
 
-      Navigator.pushNamed(context, '/report');
-    } on StorageException catch (e) {
-      safePrint('Error uploading file: ${e.message}');
+  //     Navigator.pushNamed(context, '/report');
+  //   } on StorageException catch (e) {
+  //     safePrint('Error uploading file: ${e.message}');
+  //     rethrow;
+  //   }
+  // }
+
+  Future<void> uploadIOFile(io.File file) async {
+    final url =
+        'https://7kfj895ua0.execute-api.us-east-2.amazonaws.com/default/mlExpenseReportLambda';
+
+    try {
+      var bytes = await file.readAsBytes();
+      var base64File = base64Encode(bytes);
+      var response = await http.post(
+        Uri.parse(url),
+        headers: {
+          "x-api-key": "IJQRAuOTg6amZayPdbeXdUxI8m5Rdqf8NcmTreOe",
+          "Content-Type": "application/json"
+        },
+        body: json.encode({"Image": base64File}),
+      );
+
+      if (response.statusCode == 200) {
+        safePrint('Uploaded file: ${file.path}');
+        safePrint('Response body: ${response.body}');
+        Navigator.pushNamed(context, '/report');
+      } else {
+        safePrint('Error uploading file: ${response.statusCode}');
+        safePrint('Response body: ${response.body}');
+        // var jsonBody = json.encode({"file": base64File});
+        // safePrint('JSON body: $jsonBody');
+      }
+    } catch (e) {
+      safePrint('Error uploading file: ${e.toString()}');
       rethrow;
     }
   }
