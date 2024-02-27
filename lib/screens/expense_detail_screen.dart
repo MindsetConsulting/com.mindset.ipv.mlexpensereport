@@ -12,8 +12,11 @@ class ExpenseDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ExpenseReport expenseReport =
-        ModalRoute.of(context)!.settings.arguments as ExpenseReport;
+    final arguments = ModalRoute.of(context)!.settings.arguments;
+
+    print('Arguments in ExpenseDetailScreen: $arguments');
+
+    final ExpenseReport expenseReport = arguments as ExpenseReport;
 
     return Scaffold(
       appBar: AppBar(

@@ -26,13 +26,12 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
   DateTime selectedDate = DateTime.now();
   String backendDate = '';
   final Map<String, TextEditingController> controllers = {
-    'department': TextEditingController(),
+    'department': TextEditingController(text: 'Solutions'),
     'companyname': TextEditingController(),
     'expensecategory': TextEditingController(),
     'datesubmitted': TextEditingController(),
     'amount': TextEditingController(),
     'taxinformation': TextEditingController(),
-    'businessreason': TextEditingController(),
     'projectcode': TextEditingController(),
     'status': TextEditingController(),
     'additionalnotes': TextEditingController(),
@@ -42,6 +41,21 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
   void dispose() {
     controllers.forEach((key, controller) => controller.dispose());
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Format the date for display and for the backend
+    final displayFormat = DateFormat('MMM dd, yyyy');
+    final formattedDateForDisplay = displayFormat.format(selectedDate);
+
+    final backendFormat = DateFormat('yyyy-MM-ddTHH:mm:ss');
+    backendDate = backendFormat.format(selectedDate);
+
+    // Set the 'datesubmitted' controller's text to today's date
+    controllers['datesubmitted']?.text = formattedDateForDisplay;
   }
 
   @override
@@ -89,13 +103,13 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
 
     final body = json.encode({
       'expensereportid': uniqueKey,
+      'employeeid': '001 - Curtis Kettler',
       'department': controllers['department']?.text ?? '',
       'companyname': controllers['companyname']?.text ?? '',
       'expensecategory': controllers['expensecategory']?.text ?? '',
       'datesubmitted': backendDate,
-      'amount': controllers['amount']?.text ?? '',
+      'amount': controllers['amount']?.text.replaceAll(',', '') ?? '',
       'taxinformation': controllers['taxinformation']?.text ?? '',
-      'businessreason': controllers['businessreason']?.text ?? '',
       'projectcode': controllers['projectcode']?.text ?? '',
       'status': 'pending',
       'additionalnotes': controllers['additionalnotes']?.text ?? '',
@@ -117,7 +131,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
 
     Map<String, dynamic> responseData = jsonDecode(reply);
 
-    // print('ResponseData: $responseData');
+    print('ResponseData: $responseData');
     return responseData;
   }
 
@@ -135,8 +149,8 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
             child: Column(
               children: <Widget>[
                 FieldContainer(
-                  fieldName: 'Employee ID',
-                  initialValue: '001',
+                  fieldName: 'Employee ID/Name',
+                  initialValue: '001 - Curtis Kettler',
                   readOnly: true,
                 ),
                 FieldContainer(
@@ -149,10 +163,35 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                   controller: controllers['companyname']!,
                   isRequired: true,
                 ),
-                FieldContainer(
-                  fieldName: 'Expense Category',
-                  controller: controllers['expensecategory']!,
-                  isRequired: true,
+                Container(
+                  width: 340, // Set the width to the desired value
+                  child: DropdownButtonFormField<String>(
+                    value: null,
+                    decoration: FieldContainer.inputDecoration
+                        .copyWith(labelText: 'Expense Category'),
+                    onChanged: (String? newValue) {
+                      controllers['expensecategory']?.text = newValue ?? '';
+                    },
+                    validator: (String? value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please select a category';
+                      }
+                      return null;
+                    },
+                    items: <String>[
+                      'Travel',
+                      'Office',
+                      'Personal Development',
+                      'Training'
+                    ].map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList()
+                      ..add(DropdownMenuItem(
+                          value: null, child: Text('Please select'))),
+                  ),
                 ),
                 FieldContainer(
                   fieldName: 'Date',
@@ -203,10 +242,6 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                 FieldContainer(
                   fieldName: 'Tax Information',
                   controller: controllers['taxinformation']!,
-                ),
-                FieldContainer(
-                  fieldName: 'Business Reason',
-                  controller: controllers['businessreason']!,
                 ),
                 FieldContainer(
                   fieldName: 'Project Code',

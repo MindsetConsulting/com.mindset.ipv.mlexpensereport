@@ -12,6 +12,7 @@ class CustomCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        print('Expense Report in CustomCard: $expenseReport');
         Navigator.pushNamed(
           context,
           '/detail',
