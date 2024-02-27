@@ -44,6 +44,28 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
     super.dispose();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    print('didChangeDependencies called');
+
+    // Get the arguments
+    final arguments = ModalRoute.of(context)?.settings.arguments;
+
+    print('Arguments: $arguments');
+
+    // Check if arguments is not null and is a Map
+    if (arguments is Map<String, dynamic>) {
+      final total = arguments['total'];
+
+      // Print the total
+      print('Total in /report screen: $total');
+
+      // Set the total as the initial value of the 'Amount' field
+      controllers['amount']?.text = total;
+    }
+  }
+
   String generateRandomString(int length) {
     const _randomChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     const _charsLength = _randomChars.length;

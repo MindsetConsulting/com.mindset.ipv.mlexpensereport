@@ -50,7 +50,8 @@ class MainApp extends StatelessWidget {
             return MaterialPageRoute(builder: (context) => UploadFile());
           case '/report':
             return MaterialPageRoute(
-                builder: (context) => const ExpenseReportScreen());
+              builder: (context) => ExpenseReportScreen(),
+            );
           case '/confirmation':
             final responseData = settings.arguments;
             return MaterialPageRoute(

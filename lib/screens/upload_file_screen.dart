@@ -11,6 +11,7 @@ import '../widgets/image_picker_action_sheet.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
 import '../widgets/custom_round_button.dart';
+import '../screens/expense_report_screen.dart';
 
 class UploadFile extends StatefulWidget {
   @override
@@ -85,8 +86,22 @@ class _UploadFileState extends State<UploadFile> {
       if (response.statusCode == 200) {
         safePrint('Uploaded file: ${file.path}');
         safePrint('Response body: ${response.body}');
-        //need to save response into an object and pass it to the next screen
-        Navigator.pushNamed(context, '/report');
+        final responseBody = jsonDecode(response.body);
+        final total = responseBody['Total'];
+
+        // Print the total
+        safePrint('Total in /upload screen: $total');
+
+        // Pass the total as an argument
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ExpenseReportScreen(),
+            settings: RouteSettings(
+              arguments: {'total': total},
+            ),
+          ),
+        );
       } else {
         safePrint('Error uploading file: ${response.statusCode}');
         safePrint('Response body: ${response.body}');
