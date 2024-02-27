@@ -88,17 +88,14 @@ class _UploadFileState extends State<UploadFile> {
         safePrint('Response body: ${response.body}');
         final responseBody = jsonDecode(response.body);
         final total = responseBody['Total'];
+        final companyName = responseBody['CompanyName'];
 
-        // Print the total
-        safePrint('Total in /upload screen: $total');
-
-        // Pass the total as an argument
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => ExpenseReportScreen(),
             settings: RouteSettings(
-              arguments: {'total': total},
+              arguments: {'companyName': companyName, 'total': total},
             ),
           ),
         );

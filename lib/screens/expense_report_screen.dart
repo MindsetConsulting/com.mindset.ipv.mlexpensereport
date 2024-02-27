@@ -47,22 +47,16 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    print('didChangeDependencies called');
-
-    // Get the arguments
     final arguments = ModalRoute.of(context)?.settings.arguments;
-
-    print('Arguments: $arguments');
-
-    // Check if arguments is not null and is a Map
     if (arguments is Map<String, dynamic>) {
       final total = arguments['total'];
-
-      // Print the total
-      print('Total in /report screen: $total');
-
-      // Set the total as the initial value of the 'Amount' field
-      controllers['amount']?.text = total;
+      final companyName = arguments['companyName'];
+      if (total != null) {
+        controllers['amount']?.text = total;
+      }
+      if (companyName != null) {
+        controllers['companyname']?.text = companyName;
+      }
     }
   }
 
