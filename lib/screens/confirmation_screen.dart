@@ -142,16 +142,6 @@ class ConfirmationScreen extends StatelessWidget {
                   margin: const EdgeInsets.all(10.0),
                   height: 40,
                   child: TextFormField(
-                    initialValue: responseData['d']['businessreason'],
-                    readOnly: true,
-                    decoration:
-                        inputDecoration.copyWith(labelText: 'Business Reason'),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(10.0),
-                  height: 40,
-                  child: TextFormField(
                     initialValue: responseData['d']['projectcode'],
                     readOnly: true,
                     decoration:

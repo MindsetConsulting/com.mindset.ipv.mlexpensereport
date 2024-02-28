@@ -187,7 +187,6 @@ class _ExpenseReportListScreenState extends State<ExpenseReportListScreen> {
             child: ListView.builder(
               itemCount: cardData.length,
               itemBuilder: (context, index) {
-                print('Building CustomCard for index $index');
                 return Align(
                   alignment: Alignment.topCenter,
                   child: CustomCard(expenseReport: cardData[index]),
