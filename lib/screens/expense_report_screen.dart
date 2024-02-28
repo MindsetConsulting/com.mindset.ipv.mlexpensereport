@@ -46,15 +46,10 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
   @override
   void initState() {
     super.initState();
-
-    // Format the date for display and for the backend
     final displayFormat = DateFormat('MMM dd, yyyy');
     final formattedDateForDisplay = displayFormat.format(selectedDate);
-
     final backendFormat = DateFormat('yyyy-MM-ddTHH:mm:ss');
     backendDate = backendFormat.format(selectedDate);
-
-    // Set the 'datesubmitted' controller's text to today's date
     controllers['datesubmitted']?.text = formattedDateForDisplay;
   }
 

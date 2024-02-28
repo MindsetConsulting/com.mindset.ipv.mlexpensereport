@@ -26,4 +26,21 @@ class ExpenseReport {
     required this.status,
     required this.additionalNotes,
   });
+
+  factory ExpenseReport.fromJson(Map<String, dynamic> json) {
+    return ExpenseReport(
+      employeeId: json['employeeid'] ?? '',
+      department: json['department'] ?? '',
+      companyName: json['companyname'] ?? '',
+      dateSubmitted: json['datesubmitted'] ?? '',
+      expenseCategory: json['expensecategory'] ?? '',
+      currency: json['currency'] ?? '',
+      amount: double.tryParse(json['amount'] ?? '') ?? 0.0,
+      taxInformation: json['taxinformation'] ?? '',
+      businessReason: json['businessreason'] ?? '',
+      projectCode: json['projectcode'] ?? '',
+      status: json['status'] ?? '',
+      additionalNotes: json['additionalnotes'] ?? '',
+    );
+  }
 }

@@ -47,8 +47,7 @@ class CustomCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            DateFormat.yMMMd().format(
-                                DateTime.parse(expenseReport.dateSubmitted)),
+                            expenseReport.dateSubmitted,
                             style: const TextStyle(
                               fontStyle: FontStyle.italic,
                               fontSize: 14,
