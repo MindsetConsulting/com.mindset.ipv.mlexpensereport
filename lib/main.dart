@@ -60,8 +60,13 @@ class MainApp extends StatelessWidget {
               ),
             );
           case '/detail':
+            final expenseReport = settings.arguments;
             return MaterialPageRoute(
-                builder: (context) => const ExpenseDetailScreen());
+              builder: (context) => ExpenseDetailScreen(),
+              settings: RouteSettings(
+                arguments: expenseReport,
+              ),
+            );
           default:
             return MaterialPageRoute(
                 builder: (context) =>

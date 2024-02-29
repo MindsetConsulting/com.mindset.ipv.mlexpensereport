@@ -16,6 +16,12 @@ class ExpenseDetailScreen extends StatelessWidget {
 
     print('Arguments in ExpenseDetailScreen: $arguments');
 
+    if (arguments == null) {
+      return Scaffold(
+        body: Center(child: Text('No arguments received')),
+      );
+    }
+
     final ExpenseReport expenseReport = arguments as ExpenseReport;
 
     return Scaffold(
@@ -54,8 +60,7 @@ class ExpenseDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 5),
             Text(
-              DateFormat('MMM dd, yyyy')
-                  .format(DateTime.parse(expenseReport.dateSubmitted)),
+              expenseReport.dateSubmitted,
               style: contentStyle,
             ),
             const SizedBox(height: 15),
@@ -70,15 +75,15 @@ class ExpenseDetailScreen extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
+                  const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Currency',
                         style: headerStyle,
                       ),
-                      const SizedBox(height: 5),
-                      Text(expenseReport.currency, style: contentStyle),
+                      SizedBox(height: 5),
+                      Text("USD", style: contentStyle),
                     ],
                   ),
                   const SizedBox(width: 50),
@@ -104,13 +109,6 @@ class ExpenseDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 5),
             Text(expenseReport.taxInformation, style: contentStyle),
-            const SizedBox(height: 15),
-            const Text(
-              'Business Reason',
-              style: headerStyle,
-            ),
-            const SizedBox(height: 5),
-            Text(expenseReport.businessReason, style: contentStyle),
             const SizedBox(height: 15),
             const Text(
               'Project Code',
