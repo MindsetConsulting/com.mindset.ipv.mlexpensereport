@@ -1,14 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import '../models/expense_report.dart';
 
-class CustomToolbar extends StatelessWidget {
+class CustomToolbar extends StatefulWidget {
   final List<ExpenseReport> data;
   final Function(List<ExpenseReport>) onSort;
+  final Function(List<ExpenseReport>) onSearch;
 
-  CustomToolbar({required this.data, required this.onSort, Key? key})
+  CustomToolbar(
+      {required this.data,
+      required this.onSort,
+      required this.onSearch,
+      Key? key})
       : super(key: key);
+
+  @override
+  _CustomToolbarState createState() => _CustomToolbarState();
+}
+
+class _CustomToolbarState extends State<CustomToolbar> {
+  int? selectedValue;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -23,32 +35,39 @@ class CustomToolbar extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20.0),
               ),
-              child: CupertinoSegmentedControl<int>(
-                children: {
-                  0: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10.0),
-                    child: Text(
-                      'Month',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
+            ),
+            Expanded(
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                  labelText: 'Search',
+                  prefixIcon: Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30.0),
                   ),
-                  1: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10.0),
-                    child: Text(
-                      'Quarter',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white, width: 2.0),
+                    borderRadius: BorderRadius.circular(30.0),
                   ),
-                  2: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10.0),
-                    child: Text(
-                      'Year',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                    borderRadius: BorderRadius.circular(30.0),
                   ),
-                },
-                onValueChanged: (int? newValue) {
-                  // Add code here
+                ),
+                onChanged: (value) {
+                  if (value.isEmpty) {
+                    widget.onSearch(widget.data);
+                  } else {
+                    List<ExpenseReport> searchData = widget.data.where((report) {
+                      return report.companyName
+                          .toLowerCase()
+                          .contains(value.toLowerCase());
+                    }).toList();
+
+                    widget.onSearch(searchData);
+                  }
                 },
               ),
             ),
@@ -68,12 +87,9 @@ class CustomToolbar extends StatelessWidget {
                 showMenu(
                   context: context,
                   position: RelativeRect.fromLTRB(
-                    buttonPosition.dx +
-                        buttonWidth, // Add the width of the button to the left property
+                    buttonPosition.dx + buttonWidth,
                     buttonPosition.dy,
-                    overlay.size.width -
-                        buttonPosition
-                            .dx, // Subtract the button's x position from the overlay width
+                    overlay.size.width - buttonPosition.dx,
                     overlay.size.height - buttonPosition.dy,
                   ),
                   items: [
@@ -91,7 +107,7 @@ class CustomToolbar extends StatelessWidget {
                     ),
                   ],
                 ).then((value) {
-                  List<ExpenseReport> sortedData = List.from(data);
+                  List<ExpenseReport> sortedData = List.from(widget.data);
                   switch (value) {
                     case 'date':
                       sortedData.sort((a, b) {
@@ -109,7 +125,7 @@ class CustomToolbar extends StatelessWidget {
                       sortedData.sort((a, b) => a.status.compareTo(b.status));
                       break;
                   }
-                  onSort(sortedData); // Call the callback with the sorted data
+                  widget.onSort(sortedData);
                 });
               },
             ),

@@ -21,27 +21,29 @@ class ExpenseReportListScreen extends StatefulWidget {
 }
 
 class _ExpenseReportListScreenState extends State<ExpenseReportListScreen> {
+  List<ExpenseReport> originalData = [];
   List<ExpenseReport> cardData = [];
 
   @override
-  void initState() {
-    super.initState();
-    fetchExpenseData().then((data) {
-      setState(() {
-        cardData = data
-            .where((item) => item != null)
-            .map((item) => ExpenseReport.fromJson(item!))
-            .toList();
-        cardData.sort((a, b) {
-          DateTime dateA = DateFormat('MMM dd, yyyy').parse(a.dateSubmitted);
-          DateTime dateB = DateFormat('MMM dd, yyyy').parse(b.dateSubmitted);
-          return dateB.compareTo(dateA);
-        });
+void initState() {
+  super.initState();
+  fetchExpenseData().then((data) {
+    setState(() {
+      originalData = data
+          .where((item) => item != null)
+          .map((item) => ExpenseReport.fromJson(item!))
+          .toList();
+      cardData = List.from(originalData);
+      cardData.sort((a, b) {
+        DateTime dateA = DateFormat('MMM dd, yyyy').parse(a.dateSubmitted);
+        DateTime dateB = DateFormat('MMM dd, yyyy').parse(b.dateSubmitted);
+        return dateB.compareTo(dateA);
       });
-    }).catchError((error) {
-      print('Error fetching expense data: $error');
     });
-  }
+  }).catchError((error) {
+    print('Error fetching expense data: $error');
+  });
+}
 
   Future<List<dynamic>> fetchExpenseData() async {
     String? username = dotenv.env['USERNAME'];
@@ -192,6 +194,11 @@ class _ExpenseReportListScreenState extends State<ExpenseReportListScreen> {
             onSort: (sortedData) {
               setState(() {
                 cardData = sortedData;
+              });
+            },
+            onSearch: (searchData) {
+              setState(() {
+                cardData = searchData;
               });
             },
           ),
