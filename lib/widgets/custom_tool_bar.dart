@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
+import '../models/expense_report.dart';
 
 class CustomToolbar extends StatelessWidget {
+  final List<ExpenseReport> data;
+  final Function(List<ExpenseReport>) onSort;
+
+  CustomToolbar({required this.data, required this.onSort, Key? key})
+      : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -45,9 +53,64 @@ class CustomToolbar extends StatelessWidget {
               ),
             ),
             IconButton(
-              icon: Icon(Icons.sort, color: Theme.of(context).colorScheme.primary),
+              icon: Icon(Icons.sort,
+                  color: Theme.of(context).colorScheme.primary),
               onPressed: () {
-                // Add your code here
+                final RenderBox button =
+                    context.findRenderObject() as RenderBox;
+                final RenderBox overlay = Overlay.of(context)!
+                    .context
+                    .findRenderObject() as RenderBox;
+                final Offset buttonPosition =
+                    button.localToGlobal(Offset.zero, ancestor: overlay);
+                final double buttonWidth = button.size.width;
+
+                showMenu(
+                  context: context,
+                  position: RelativeRect.fromLTRB(
+                    buttonPosition.dx +
+                        buttonWidth, // Add the width of the button to the left property
+                    buttonPosition.dy,
+                    overlay.size.width -
+                        buttonPosition
+                            .dx, // Subtract the button's x position from the overlay width
+                    overlay.size.height - buttonPosition.dy,
+                  ),
+                  items: [
+                    PopupMenuItem(
+                      child: Text('Date'),
+                      value: 'date',
+                    ),
+                    PopupMenuItem(
+                      child: Text('Amount'),
+                      value: 'amount',
+                    ),
+                    PopupMenuItem(
+                      child: Text('Status'),
+                      value: 'status',
+                    ),
+                  ],
+                ).then((value) {
+                  List<ExpenseReport> sortedData = List.from(data);
+                  switch (value) {
+                    case 'date':
+                      sortedData.sort((a, b) {
+                        DateTime dateA =
+                            DateFormat('MMM dd, yyyy').parse(a.dateSubmitted);
+                        DateTime dateB =
+                            DateFormat('MMM dd, yyyy').parse(b.dateSubmitted);
+                        return dateB.compareTo(dateA);
+                      });
+                      break;
+                    case 'amount':
+                      sortedData.sort((a, b) => b.amount.compareTo(a.amount));
+                      break;
+                    case 'status':
+                      sortedData.sort((a, b) => a.status.compareTo(b.status));
+                      break;
+                  }
+                  onSort(sortedData); // Call the callback with the sorted data
+                });
               },
             ),
           ],

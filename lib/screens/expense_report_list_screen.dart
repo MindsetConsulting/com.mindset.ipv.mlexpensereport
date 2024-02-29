@@ -32,6 +32,11 @@ class _ExpenseReportListScreenState extends State<ExpenseReportListScreen> {
             .where((item) => item != null)
             .map((item) => ExpenseReport.fromJson(item!))
             .toList();
+        cardData.sort((a, b) {
+          DateTime dateA = DateFormat('MMM dd, yyyy').parse(a.dateSubmitted);
+          DateTime dateB = DateFormat('MMM dd, yyyy').parse(b.dateSubmitted);
+          return dateB.compareTo(dateA);
+        });
       });
     }).catchError((error) {
       print('Error fetching expense data: $error');
@@ -182,7 +187,14 @@ class _ExpenseReportListScreenState extends State<ExpenseReportListScreen> {
             pendingAmount: '\$${pendingAmount.toStringAsFixed(2)}',
             rejectedAmount: '\$${rejectedAmount.toStringAsFixed(2)}',
           ),
-          CustomToolbar(),
+          CustomToolbar(
+            data: cardData,
+            onSort: (sortedData) {
+              setState(() {
+                cardData = sortedData;
+              });
+            },
+          ),
           Expanded(
             child: ListView.builder(
               itemCount: cardData.length,
