@@ -3,12 +3,14 @@ import 'package:intl/intl.dart';
 import '../models/expense_report.dart';
 
 class CustomToolbar extends StatefulWidget {
+  final List<ExpenseReport> originalData;
   final List<ExpenseReport> data;
   final Function(List<ExpenseReport>) onSort;
   final Function(List<ExpenseReport>) onSearch;
 
-  CustomToolbar(
-      {required this.data,
+  CustomToolbar({
+      required this.originalData,
+      required this.data,
       required this.onSort,
       required this.onSearch,
       Key? key})
@@ -57,17 +59,11 @@ class _CustomToolbarState extends State<CustomToolbar> {
                   ),
                 ),
                 onChanged: (value) {
-                  if (value.isEmpty) {
-                    widget.onSearch(widget.data);
-                  } else {
-                    List<ExpenseReport> searchData = widget.data.where((report) {
-                      return report.companyName
+                  widget.onSearch(widget.originalData
+                      .where((report) => report.companyName
                           .toLowerCase()
-                          .contains(value.toLowerCase());
-                    }).toList();
-
-                    widget.onSearch(searchData);
-                  }
+                          .contains(value.toLowerCase()))
+                      .toList());
                 },
               ),
             ),

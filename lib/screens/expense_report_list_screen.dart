@@ -190,6 +190,7 @@ void initState() {
             rejectedAmount: '\$${rejectedAmount.toStringAsFixed(2)}',
           ),
           CustomToolbar(
+            originalData: originalData,
             data: cardData,
             onSort: (sortedData) {
               setState(() {
