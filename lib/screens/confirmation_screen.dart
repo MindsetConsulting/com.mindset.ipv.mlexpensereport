@@ -4,6 +4,9 @@ import 'package:intl/intl.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
 import '../widgets/custom_round_button.dart';
 import '../widgets/custom_app_bar.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 const InputDecoration inputDecoration = InputDecoration(
   border: OutlineInputBorder(),
@@ -11,11 +14,46 @@ const InputDecoration inputDecoration = InputDecoration(
   labelStyle: TextStyle(fontSize: 12.0),
 );
 
-class ConfirmationScreen extends StatelessWidget {
+class ConfirmationScreen extends StatefulWidget {
   final Map<String, dynamic> responseData;
 
   const ConfirmationScreen({Key? key, required this.responseData})
       : super(key: key);
+
+  @override
+  _ConfirmationScreenState createState() => _ConfirmationScreenState();
+}
+
+class _ConfirmationScreenState extends State<ConfirmationScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _getPhoto(widget.responseData['slug']);
+  }
+
+  Future<http.Response> _getPhoto(String slug) async {
+    dotenv.load();
+    String? username = dotenv.env['USERNAME'];
+    String? password = dotenv.env['PASSWORD'];
+    String url =
+        'https://s4hana2022.mindsetconsulting.com:44300/sap/opu/odata/sap/ZIMAGE_SRV/zimageSet(Mandt=\'100\',Filename=\'$slug\')/\$value';
+    Map<String, String> headers = {
+      'Authorization':
+          'Basic ' + base64Encode(utf8.encode('$username:$password')),
+      'X-Requested-With': 'false',
+    };
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: headers,
+      );
+      print('Response status code: ${response.statusCode}');
+      return response;
+    } catch (e) {
+      print('Error making GET request: $e');
+      rethrow;
+    }
+  }
 
   String formatDate(String dateStr) {
     final match = RegExp(r'/Date\((\d+)([+-]\d+)?\)/').firstMatch(dateStr);
@@ -31,13 +69,13 @@ class ConfirmationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       Fluttertoast.showToast(
           msg: "Expense report submitted successfully",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.green,
+          timeInSecForIosWeb: 2,
+          backgroundColor: Theme.of(context).colorScheme.primary,
           textColor: Colors.white,
           fontSize: 16.0);
     });
@@ -64,7 +102,7 @@ class ConfirmationScreen extends StatelessWidget {
                   margin: const EdgeInsets.all(10.0),
                   height: 40,
                   child: TextFormField(
-                    initialValue: responseData['d']['department'],
+                    initialValue: widget.responseData['d']['department'],
                     readOnly: true,
                     decoration:
                         inputDecoration.copyWith(labelText: 'Department'),
@@ -74,7 +112,7 @@ class ConfirmationScreen extends StatelessWidget {
                   margin: const EdgeInsets.all(10.0),
                   height: 40,
                   child: TextFormField(
-                    initialValue: responseData['d']['companyname'],
+                    initialValue: widget.responseData['d']['companyname'],
                     readOnly: true,
                     decoration:
                         inputDecoration.copyWith(labelText: 'Company Name'),
@@ -84,7 +122,7 @@ class ConfirmationScreen extends StatelessWidget {
                   margin: const EdgeInsets.all(10.0),
                   height: 40,
                   child: TextFormField(
-                    initialValue: responseData['d']['expensecategory'],
+                    initialValue: widget.responseData['d']['expensecategory'],
                     readOnly: true,
                     decoration:
                         inputDecoration.copyWith(labelText: 'Expense Category'),
@@ -95,7 +133,7 @@ class ConfirmationScreen extends StatelessWidget {
                   height: 40,
                   child: TextFormField(
                     initialValue:
-                        formatDate(responseData['d']['datesubmitted']),
+                        formatDate(widget.responseData['d']['datesubmitted']),
                     readOnly: true,
                     decoration: inputDecoration.copyWith(labelText: 'Date'),
                   ),
@@ -119,7 +157,7 @@ class ConfirmationScreen extends StatelessWidget {
                         margin: const EdgeInsets.all(10.0),
                         height: 40,
                         child: TextFormField(
-                          initialValue: responseData['d']['amount'],
+                          initialValue: widget.responseData['d']['amount'],
                           readOnly: true,
                           decoration:
                               inputDecoration.copyWith(labelText: 'Amount'),
@@ -132,7 +170,7 @@ class ConfirmationScreen extends StatelessWidget {
                   margin: const EdgeInsets.all(10.0),
                   height: 40,
                   child: TextFormField(
-                    initialValue: responseData['d']['taxinformation'],
+                    initialValue: widget.responseData['d']['taxinformation'],
                     readOnly: true,
                     decoration:
                         inputDecoration.copyWith(labelText: 'Tax Information'),
@@ -142,7 +180,7 @@ class ConfirmationScreen extends StatelessWidget {
                   margin: const EdgeInsets.all(10.0),
                   height: 40,
                   child: TextFormField(
-                    initialValue: responseData['d']['projectcode'],
+                    initialValue: widget.responseData['d']['projectcode'],
                     readOnly: true,
                     decoration:
                         inputDecoration.copyWith(labelText: 'Project Code'),
@@ -161,11 +199,32 @@ class ConfirmationScreen extends StatelessWidget {
                   margin: const EdgeInsets.all(10.0),
                   height: 40,
                   child: TextFormField(
-                    initialValue: responseData['d']['additionalnotes'],
+                    initialValue: widget.responseData['d']['additionalnotes'],
                     readOnly: true,
                     decoration:
                         inputDecoration.copyWith(labelText: 'Additional Notes'),
                     maxLines: null,
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.all(10.0),
+                  height: 400,
+                  child: FutureBuilder<http.Response>(
+                    future: _getPhoto(widget.responseData['slug']),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<http.Response> snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else {
+                        return snapshot.data != null &&
+                                snapshot.data!.request != null
+                            ? Image.network(
+                                snapshot.data!.request!.url.toString())
+                            : Container();
+                      }
+                    },
                   ),
                 ),
               ],

@@ -11,6 +11,7 @@ class ExpenseReport {
   final String projectCode;
   final String status;
   final String additionalNotes;
+  final String slug;
 
   ExpenseReport({
     required this.employeeId,
@@ -25,6 +26,7 @@ class ExpenseReport {
     required this.projectCode,
     required this.status,
     required this.additionalNotes,
+    required this.slug,
   });
 
   factory ExpenseReport.fromJson(Map<String, dynamic> json) {
@@ -41,6 +43,7 @@ class ExpenseReport {
       projectCode: json['projectcode'] ?? '',
       status: json['status'] ?? '',
       additionalNotes: json['additionalnotes'] ?? '',
+      slug: json['slug'] ?? '',
     );
   }
 }

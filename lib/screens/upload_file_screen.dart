@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../services/media/media_service_interface.dart';
 import '../services/service_locator.dart';
 import '../widgets/image_picker_action_sheet.dart';
@@ -56,15 +57,42 @@ class _UploadFileState extends State<UploadFile> {
 
     try {
       final ioFile = io.File(pickedImageFile.path);
-      await uploadIOFile(ioFile);
-      safePrint('File selected');
+      final slug = _generateSlug();
+      await uploadIOFile(ioFile, slug);
+      final sapUrl =
+          'https://s4hana2022.mindsetconsulting.com:44300/sap/opu/odata/sap/ZIMAGE_SRV/zimageSet';
+      dotenv.load();
+      String? username = dotenv.env['USERNAME'];
+      String? password = dotenv.env['PASSWORD'];
+      final sapHeaders = {
+        'Content-Type': 'image/jpeg',
+        'Accept': 'application/json',
+        'Authorization':
+            'Basic ' + base64Encode(utf8.encode('$username:$password')),
+        'SLUG': slug,
+        'X-Requested-With': 'false',
+      };
+
+      var imageBytes = await io.File(pickedImageFile.path).readAsBytes();
+      safePrint('Slug: $slug');
+      var response;
+      try {
+        response = await http.post(
+          Uri.parse(sapUrl),
+          headers: sapHeaders,
+          body: imageBytes,
+        );
+      } catch (e) {
+        safePrint('Error making POST request: $e');
+        return null;
+      }
     } catch (e) {
-      safePrint('Error uploading file to S3: $e');
+      safePrint('Error picking file: $e');
     }
   }
 
-  Future<void> uploadIOFile(io.File file) async {
-    final url =
+  Future<void> uploadIOFile(io.File file, String slug) async {
+    const url =
         'https://7kfj895ua0.execute-api.us-east-2.amazonaws.com/default/mlExpenseReportLambda';
 
     setState(() {
@@ -84,8 +112,8 @@ class _UploadFileState extends State<UploadFile> {
       );
 
       if (response.statusCode == 200) {
-        safePrint('Uploaded file: ${file.path}');
-        safePrint('Response body: ${response.body}');
+        safePrint('AWS Uploaded file: ${file.path}');
+        safePrint('AWS Response body: ${response.body}');
         final responseBody = jsonDecode(response.body);
         final total = responseBody['Total'];
         final companyName = responseBody['CompanyName'];
@@ -95,7 +123,7 @@ class _UploadFileState extends State<UploadFile> {
           MaterialPageRoute(
             builder: (context) => ExpenseReportScreen(),
             settings: RouteSettings(
-              arguments: {'companyName': companyName, 'total': total},
+              arguments: {'companyName': companyName, 'total': total, 'slug': slug,},
             ),
           ),
         );

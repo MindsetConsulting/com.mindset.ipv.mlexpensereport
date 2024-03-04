@@ -25,6 +25,7 @@ class ExpenseReportScreen extends StatefulWidget {
 class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
   DateTime selectedDate = DateTime.now();
   String backendDate = '';
+  String? slug;
   final Map<String, TextEditingController> controllers = {
     'department': TextEditingController(text: 'Solutions'),
     'companyname': TextEditingController(),
@@ -58,6 +59,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
     super.didChangeDependencies();
     final arguments = ModalRoute.of(context)?.settings.arguments;
     if (arguments is Map<String, dynamic>) {
+      slug = arguments['slug'];
       final total = arguments['total'];
       final companyName = arguments['companyName'];
       if (total != null) {
@@ -65,6 +67,9 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
       }
       if (companyName != null) {
         controllers['companyname']?.text = companyName;
+      }
+      if (arguments['slug'] != null) {
+        print('Slug argument: $slug');
       }
     }
   }
@@ -108,6 +113,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
       'projectcode': controllers['projectcode']?.text ?? '',
       'status': 'pending',
       'additionalnotes': controllers['additionalnotes']?.text ?? '',
+      'slug': slug ?? '',
     });
 
     HttpClient client = new HttpClient()
@@ -159,7 +165,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                   isRequired: true,
                 ),
                 Container(
-                  width: 340, // Set the width to the desired value
+                  width: 340,
                   child: DropdownButtonFormField<String>(
                     value: null,
                     decoration: FieldContainer.inputDecoration
@@ -263,6 +269,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                 if (_formKey.currentState!.validate()) {
                   Map<String, dynamic> responseData =
                       await submitExpenseReport();
+                  responseData['slug'] = slug;
                   Navigator.pushNamed(
                     context,
                     '/confirmation',
