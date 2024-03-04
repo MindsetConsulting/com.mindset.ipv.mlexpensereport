@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/expense_report.dart';
 import './status_indicator.dart';
-import 'package:intl/intl.dart';
 
 class CustomCard extends StatelessWidget {
   final ExpenseReport expenseReport;

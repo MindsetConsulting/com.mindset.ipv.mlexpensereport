@@ -25,25 +25,25 @@ class _ExpenseReportListScreenState extends State<ExpenseReportListScreen> {
   List<ExpenseReport> cardData = [];
 
   @override
-void initState() {
-  super.initState();
-  fetchExpenseData().then((data) {
-    setState(() {
-      originalData = data
-          .where((item) => item != null)
-          .map((item) => ExpenseReport.fromJson(item!))
-          .toList();
-      cardData = List.from(originalData);
-      cardData.sort((a, b) {
-        DateTime dateA = DateFormat('MMM dd, yyyy').parse(a.dateSubmitted);
-        DateTime dateB = DateFormat('MMM dd, yyyy').parse(b.dateSubmitted);
-        return dateB.compareTo(dateA);
+  void initState() {
+    super.initState();
+    fetchExpenseData().then((data) {
+      setState(() {
+        originalData = data
+            .where((item) => item != null)
+            .map((item) => ExpenseReport.fromJson(item!))
+            .toList();
+        cardData = List.from(originalData);
+        cardData.sort((a, b) {
+          DateTime dateA = DateFormat('MMM dd, yyyy').parse(a.dateSubmitted);
+          DateTime dateB = DateFormat('MMM dd, yyyy').parse(b.dateSubmitted);
+          return dateB.compareTo(dateA);
+        });
       });
+    }).catchError((error) {
+      print('Error fetching expense data: $error');
     });
-  }).catchError((error) {
-    print('Error fetching expense data: $error');
-  });
-}
+  }
 
   Future<List<dynamic>> fetchExpenseData() async {
     String? username = dotenv.env['USERNAME'];
@@ -136,6 +136,9 @@ void initState() {
                     .isNotEmpty
                 ? properties.findElements('d:additionalnotes').first.innerText
                 : '';
+            var slug = properties.findElements('d:slug').isNotEmpty
+                ? properties.findElements('d:slug').first.innerText
+                : '';
 
             return {
               'employeeid': employeeId,
@@ -151,6 +154,7 @@ void initState() {
               'projectcode': projectCode,
               'status': status,
               'additionalnotes': additionalNotes,
+              'slug': slug,
             };
           })
           .where((item) => item != null)
