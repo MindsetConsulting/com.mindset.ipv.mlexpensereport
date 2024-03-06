@@ -57,7 +57,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case detailRoute:
       final expenseReport = settings.arguments;
       return MaterialPageRoute(
-        builder: (context) => const ExpenseDetailScreen(),
+        builder: (context) => ExpenseDetailScreen(),
         settings: RouteSettings(
           arguments: expenseReport,
         ),
