@@ -13,7 +13,6 @@ class ExpenseDetailScreen extends StatelessWidget {
   const ExpenseDetailScreen({Key? key}) : super(key: key);
 
   Future<http.Response> _getPhoto(String slug) async {
-    print('slug: $slug');
     dotenv.load();
     String? username = dotenv.env['USERNAME'];
     String? password = dotenv.env['PASSWORD'];
@@ -40,10 +39,8 @@ class ExpenseDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final arguments = ModalRoute.of(context)!.settings.arguments;
-    print('Arguments in ExpenseDetailScreen: $arguments');
     final ExpenseReport expenseReport = arguments as ExpenseReport;
     final slug = expenseReport.slug;
-    print('Slug in ExpenseDetailScreen: $slug');
 
     if (arguments == null) {
       return Scaffold(

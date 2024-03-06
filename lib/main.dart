@@ -32,47 +32,51 @@ Future<void> _configureAmplify() async {
   }
 }
 
+const String homeRoute = '/';
+const String uploadRoute = '/upload';
+const String reportRoute = '/report';
+const String confirmationRoute = '/confirmation';
+const String detailRoute = '/detail';
+
+Route<dynamic> generateRoute(RouteSettings settings) {
+  switch (settings.name) {
+    case homeRoute:
+      return MaterialPageRoute(
+          builder: (context) => ExpenseReportListScreen(key: UniqueKey()));
+    case uploadRoute:
+      return MaterialPageRoute(builder: (context) => UploadFile());
+    case reportRoute:
+      return MaterialPageRoute(builder: (context) => const ExpenseReportScreen());
+    case confirmationRoute:
+      final responseData = settings.arguments;
+      return MaterialPageRoute(
+        builder: (context) => ConfirmationScreen(
+          responseData: responseData as Map<String, dynamic>,
+        ),
+      );
+    case detailRoute:
+      final expenseReport = settings.arguments;
+      return MaterialPageRoute(
+        builder: (context) => const ExpenseDetailScreen(),
+        settings: RouteSettings(
+          arguments: expenseReport,
+        ),
+      );
+    default:
+      return MaterialPageRoute(
+          builder: (context) => ExpenseReportListScreen(key: UniqueKey()));
+  }
+}
+
 class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+  const MainApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: appTheme(),
-      initialRoute: '/',
-      onGenerateRoute: (settings) {
-        switch (settings.name) {
-          case '/':
-            return MaterialPageRoute(
-                builder: (context) =>
-                    ExpenseReportListScreen(key: UniqueKey()));
-          case '/upload':
-            return MaterialPageRoute(builder: (context) => UploadFile());
-          case '/report':
-            return MaterialPageRoute(
-              builder: (context) => ExpenseReportScreen(),
-            );
-          case '/confirmation':
-            final responseData = settings.arguments;
-            return MaterialPageRoute(
-              builder: (context) => ConfirmationScreen(
-                responseData: responseData as Map<String, dynamic>,
-              ),
-            );
-          case '/detail':
-            final expenseReport = settings.arguments;
-            return MaterialPageRoute(
-              builder: (context) => ExpenseDetailScreen(),
-              settings: RouteSettings(
-                arguments: expenseReport,
-              ),
-            );
-          default:
-            return MaterialPageRoute(
-                builder: (context) =>
-                    ExpenseReportListScreen(key: UniqueKey()));
-        }
-      },
+      initialRoute: homeRoute,
+      onGenerateRoute: generateRoute,
     );
   }
 }

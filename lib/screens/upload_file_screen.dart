@@ -74,7 +74,6 @@ class _UploadFileState extends State<UploadFile> {
       };
 
       var imageBytes = await io.File(pickedImageFile.path).readAsBytes();
-      safePrint('Slug: $slug');
       var response;
       try {
         response = await http.post(
@@ -112,8 +111,6 @@ class _UploadFileState extends State<UploadFile> {
       );
 
       if (response.statusCode == 200) {
-        safePrint('AWS Uploaded file: ${file.path}');
-        safePrint('AWS Response body: ${response.body}');
         final responseBody = jsonDecode(response.body);
         final total = responseBody['Total'];
         final companyName = responseBody['CompanyName'];
@@ -123,7 +120,11 @@ class _UploadFileState extends State<UploadFile> {
           MaterialPageRoute(
             builder: (context) => ExpenseReportScreen(),
             settings: RouteSettings(
-              arguments: {'companyName': companyName, 'total': total, 'slug': slug,},
+              arguments: {
+                'companyName': companyName,
+                'total': total,
+                'slug': slug,
+              },
             ),
           ),
         );
