@@ -132,7 +132,6 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
 
     Map<String, dynamic> responseData = jsonDecode(reply);
 
-    print('ResponseData: $responseData');
     return responseData;
   }
 

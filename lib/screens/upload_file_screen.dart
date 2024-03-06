@@ -22,7 +22,6 @@ class UploadFile extends StatefulWidget {
 class _UploadFileState extends State<UploadFile> {
   final MediaServiceInterface _mediaService = getIt<MediaServiceInterface>();
 
-  // File? uploadedFile;
   bool _isLoadingGettingFile = false;
 
   @override

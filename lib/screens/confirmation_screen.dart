@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import '../services/api_service.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
 import '../widgets/custom_round_button.dart';
 import '../widgets/custom_app_bar.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 const InputDecoration inputDecoration = InputDecoration(
   border: OutlineInputBorder(),
@@ -25,34 +24,12 @@ class ConfirmationScreen extends StatefulWidget {
 }
 
 class _ConfirmationScreenState extends State<ConfirmationScreen> {
+  final ApiService apiService = ApiService();
+
   @override
   void initState() {
     super.initState();
-    _getPhoto(widget.responseData['slug']);
-  }
-
-  Future<http.Response> _getPhoto(String slug) async {
-    dotenv.load();
-    String? username = dotenv.env['USERNAME'];
-    String? password = dotenv.env['PASSWORD'];
-    String url =
-        'https://s4hana2022.mindsetconsulting.com:44300/sap/opu/odata/sap/ZIMAGE_SRV/zimageSet(Mandt=\'100\',Filename=\'$slug\')/\$value';
-    Map<String, String> headers = {
-      'Authorization':
-          'Basic ' + base64Encode(utf8.encode('$username:$password')),
-      'X-Requested-With': 'false',
-    };
-    try {
-      final response = await http.get(
-        Uri.parse(url),
-        headers: headers,
-      );
-      print('Response status code: ${response.statusCode}');
-      return response;
-    } catch (e) {
-      print('Error making GET request: $e');
-      rethrow;
-    }
+    apiService.getPhoto(widget.responseData['slug']);
   }
 
   String formatDate(String dateStr) {
@@ -60,11 +37,23 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
     if (match != null) {
       final timestamp = int.parse(match.group(1)!);
       final date = DateTime.fromMillisecondsSinceEpoch(timestamp).toLocal();
-      final adjustedDate = date.add(Duration(days: 1));
+      final adjustedDate = date.add(const Duration(days: 1));
       return DateFormat.yMMMd().format(adjustedDate);
     } else {
       return 'Invalid date';
     }
+  }
+
+  Widget buildFieldContainer(String labelText, dynamic initialValue) {
+    return Container(
+      margin: const EdgeInsets.all(10.0),
+      height: 40,
+      child: TextFormField(
+        initialValue: initialValue.toString(),
+        readOnly: true,
+        decoration: inputDecoration.copyWith(labelText: labelText),
+      ),
+    );
   }
 
   @override
@@ -88,129 +77,39 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
           child: Form(
             child: Column(
               children: <Widget>[
-                Container(
-                  margin: const EdgeInsets.all(10.0),
-                  height: 40,
-                  child: TextFormField(
-                    initialValue: '001',
-                    readOnly: true,
-                    decoration:
-                        inputDecoration.copyWith(labelText: 'Employee ID'),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(10.0),
-                  height: 40,
-                  child: TextFormField(
-                    initialValue: widget.responseData['d']['department'],
-                    readOnly: true,
-                    decoration:
-                        inputDecoration.copyWith(labelText: 'Department'),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(10.0),
-                  height: 40,
-                  child: TextFormField(
-                    initialValue: widget.responseData['d']['companyname'],
-                    readOnly: true,
-                    decoration:
-                        inputDecoration.copyWith(labelText: 'Company Name'),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(10.0),
-                  height: 40,
-                  child: TextFormField(
-                    initialValue: widget.responseData['d']['expensecategory'],
-                    readOnly: true,
-                    decoration:
-                        inputDecoration.copyWith(labelText: 'Expense Category'),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(10.0),
-                  height: 40,
-                  child: TextFormField(
-                    initialValue:
-                        formatDate(widget.responseData['d']['datesubmitted']),
-                    readOnly: true,
-                    decoration: inputDecoration.copyWith(labelText: 'Date'),
-                  ),
-                ),
+                buildFieldContainer(
+                    'Employee ID', widget.responseData['employeeId']),
+                buildFieldContainer(
+                    'Department', widget.responseData['department']),
+                buildFieldContainer(
+                    'Company Name', widget.responseData['companyName']),
+                buildFieldContainer(
+                    'Expense Category', widget.responseData['expenseCategory']),
+                buildFieldContainer(
+                    'Date', formatDate(widget.responseData['dateSubmitted'])),
                 Row(
                   children: <Widget>[
                     Expanded(
-                      child: Container(
-                        margin: const EdgeInsets.all(10.0),
-                        height: 40,
-                        child: TextFormField(
-                          initialValue: 'USD',
-                          readOnly: true,
-                          decoration:
-                              inputDecoration.copyWith(labelText: 'Currency'),
-                        ),
-                      ),
+                      child: buildFieldContainer('Currency', 'USD'),
                     ),
                     Expanded(
-                      child: Container(
-                        margin: const EdgeInsets.all(10.0),
-                        height: 40,
-                        child: TextFormField(
-                          initialValue: widget.responseData['d']['amount'],
-                          readOnly: true,
-                          decoration:
-                              inputDecoration.copyWith(labelText: 'Amount'),
-                        ),
-                      ),
+                      child: buildFieldContainer(
+                          'Amount', widget.responseData['amount']),
                     ),
                   ],
                 ),
-                Container(
-                  margin: const EdgeInsets.all(10.0),
-                  height: 40,
-                  child: TextFormField(
-                    initialValue: widget.responseData['d']['taxinformation'],
-                    readOnly: true,
-                    decoration:
-                        inputDecoration.copyWith(labelText: 'Tax Information'),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(10.0),
-                  height: 40,
-                  child: TextFormField(
-                    initialValue: widget.responseData['d']['projectcode'],
-                    readOnly: true,
-                    decoration:
-                        inputDecoration.copyWith(labelText: 'Project Code'),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(10.0),
-                  height: 40,
-                  child: TextFormField(
-                    initialValue: 'Pending',
-                    readOnly: true,
-                    decoration: inputDecoration.copyWith(labelText: 'Status'),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(10.0),
-                  height: 40,
-                  child: TextFormField(
-                    initialValue: widget.responseData['d']['additionalnotes'],
-                    readOnly: true,
-                    decoration:
-                        inputDecoration.copyWith(labelText: 'Additional Notes'),
-                    maxLines: null,
-                  ),
-                ),
+                buildFieldContainer(
+                    'Tax Information', widget.responseData['taxInformation']),
+                buildFieldContainer(
+                    'Project Code', widget.responseData['projectCode']),
+                buildFieldContainer('Status', 'Pending'),
+                buildFieldContainer(
+                    'Additional Notes', widget.responseData['additionalNotes']),
                 Container(
                   margin: const EdgeInsets.all(10.0),
                   height: 400,
                   child: FutureBuilder<http.Response>(
-                    future: _getPhoto(widget.responseData['slug']),
+                    future: apiService.getPhoto(widget.responseData['slug']),
                     builder: (BuildContext context,
                         AsyncSnapshot<http.Response> snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
