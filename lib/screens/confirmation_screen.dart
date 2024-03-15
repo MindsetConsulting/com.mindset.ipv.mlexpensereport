@@ -32,14 +32,20 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
     apiService.getPhoto(widget.responseData['slug']);
   }
 
-  String formatDate(String dateStr) {
-    final match = RegExp(r'/Date\((\d+)([+-]\d+)?\)/').firstMatch(dateStr);
-    if (match != null) {
-      final timestamp = int.parse(match.group(1)!);
-      final date = DateTime.fromMillisecondsSinceEpoch(timestamp).toLocal();
-      final adjustedDate = date.add(const Duration(days: 1));
-      return DateFormat.yMMMd().format(adjustedDate);
-    } else {
+  String formatDate(String? dateStr) {
+    if (dateStr == null) {
+      return 'Invalid date';
+    }
+    try {
+      final match = RegExp(r'/Date\((\d+)([+-]\d+)?\)/').firstMatch(dateStr);
+      if (match != null) {
+        final timestamp = int.parse(match.group(1)!);
+        final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
+        return DateFormat('MMM dd, yyyy').format(date);
+      } else {
+        return 'Invalid date';
+      }
+    } catch (e) {
       return 'Invalid date';
     }
   }
@@ -49,7 +55,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
       margin: const EdgeInsets.all(10.0),
       height: 40,
       child: TextFormField(
-        initialValue: initialValue.toString(),
+        initialValue: initialValue != null ? initialValue.toString() : '',
         readOnly: true,
         decoration: inputDecoration.copyWith(labelText: labelText),
       ),
@@ -78,15 +84,15 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
             child: Column(
               children: <Widget>[
                 buildFieldContainer(
-                    'Employee ID', widget.responseData['employeeId']),
+                    'Employee ID', widget.responseData['d']['employeeid']),
                 buildFieldContainer(
-                    'Department', widget.responseData['department']),
+                    'Department', widget.responseData['d']['department']),
                 buildFieldContainer(
-                    'Company Name', widget.responseData['companyName']),
-                buildFieldContainer(
-                    'Expense Category', widget.responseData['expenseCategory']),
-                buildFieldContainer(
-                    'Date', formatDate(widget.responseData['dateSubmitted'])),
+                    'Company Name', widget.responseData['d']['companyname']),
+                buildFieldContainer('Expense Category',
+                    widget.responseData['d']['expensecategory']),
+                buildFieldContainer('Date',
+                    formatDate(widget.responseData['d']['datesubmitted'])),
                 Row(
                   children: <Widget>[
                     Expanded(
@@ -94,22 +100,23 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
                     ),
                     Expanded(
                       child: buildFieldContainer(
-                          'Amount', widget.responseData['amount']),
+                          'Amount', widget.responseData['d']['amount']),
                     ),
                   ],
                 ),
+                buildFieldContainer('Tax Information',
+                    widget.responseData['d']['taxinformation']),
                 buildFieldContainer(
-                    'Tax Information', widget.responseData['taxInformation']),
-                buildFieldContainer(
-                    'Project Code', widget.responseData['projectCode']),
+                    'Project Code', widget.responseData['d']['projectcode']),
                 buildFieldContainer('Status', 'Pending'),
-                buildFieldContainer(
-                    'Additional Notes', widget.responseData['additionalNotes']),
+                buildFieldContainer('Additional Notes',
+                    widget.responseData['d']['additionalnotes']),
                 Container(
                   margin: const EdgeInsets.all(10.0),
                   height: 400,
                   child: FutureBuilder<http.Response>(
-                    future: apiService.getPhoto(widget.responseData['slug']),
+                    future:
+                        apiService.getPhoto(widget.responseData['d']['slug']),
                     builder: (BuildContext context,
                         AsyncSnapshot<http.Response> snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {

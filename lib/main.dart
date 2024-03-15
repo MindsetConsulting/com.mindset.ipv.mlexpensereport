@@ -25,7 +25,6 @@ Future<void> _configureAmplify() async {
     final auth = AmplifyAuthCognito();
     final storage = AmplifyStorageS3();
     await Amplify.addPlugins([auth, storage]);
-
     await Amplify.configure(amplifyconfig);
   } on Exception catch (e) {
     safePrint('An error occurred configuring Amplify: $e');
