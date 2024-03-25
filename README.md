@@ -1,4 +1,4 @@
-# Expense Report App
+# SpendSnap: Expense Report App
 
 This is a Flutter application designed to handle expense reports. The app allows users to submit expense reports and view a confirmation screen with the details of the submitted report as well as a list of all previous submitted expense reports and their status.
 
